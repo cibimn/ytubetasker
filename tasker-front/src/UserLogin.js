@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import 'tailwindcss/tailwind.css';
 import './axiosConfig';
+import { useNavigate } from 'react-router-dom';
 
 const UserLogin = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
+
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,9 +24,11 @@ const UserLogin = () => {
             await axios.post('http://localhost:8000/api/users/user_login/', { email, password }, {
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                withCredentials: true
             });
             alert('User logged in successfully');
+            navigate('/');
         } catch (error) {
             alert('An error occurred while logging in');
             console.error('There was an error!', error);

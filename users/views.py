@@ -11,6 +11,8 @@ from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login
 from django.contrib.auth import logout
+from rest_framework.decorators import api_view
+
 
 User = get_user_model()
 
@@ -179,3 +181,10 @@ class UserLogoutView(views.APIView):
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "No user is logged in"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def check_auth_status(request):
+    if request.user.is_authenticated:
+        return Response({'status': 'authenticated'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'status': 'unauthenticated'}, status=status.HTTP_401_UNAUTHORIZED)
