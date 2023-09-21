@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
   frontend:
-    build: ./tasker-front
+    build: ./tasker-vite-front
     ports:
       - "3000:3000"
   db:
