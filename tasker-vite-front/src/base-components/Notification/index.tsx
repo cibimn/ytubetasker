@@ -2,24 +2,33 @@ import { useRef, createRef, useEffect } from "react";
 import { init, reInit } from "./notification";
 import Toastify, { Options } from "toastify-js";
 import clsx from "clsx";
+import Lucide from "../../base-components/Lucide";
+
+
+interface CustomOptions extends Options {
+  status?: "success" | "failure";
+}
 
 export interface NotificationElement extends HTMLDivElement {
   toastify: ReturnType<typeof Toastify>;
   showToast: () => void;
   hideToast: () => void;
+  options: Options;
+  status: Text;
 }
 
 export interface NotificationProps
   extends React.PropsWithChildren,
     React.ComponentPropsWithoutRef<"div"> {
-  options: Options;
+  options: CustomOptions;
   getRef: (el: NotificationElement) => void;
 }
 
 function Notification(props: NotificationProps) {
   const initialRender = useRef(true);
   const toastifyRef = createRef<NotificationElement>();
-
+  const icon = props.options.status === "success" ? "CheckCircle" : "XCircle";
+  const textColor = props.options.status === "success" ? "text-success" : "text-danger";
   useEffect(() => {
     if (toastifyRef.current) {
       if (initialRender.current) {
@@ -42,6 +51,15 @@ function Notification(props: NotificationProps) {
       ])}
       ref={toastifyRef}
     >
+      <Lucide icon={icon} className={textColor} />
+      <div className="ml-4 mr-4">
+          <div className="font-medium">
+              {props.options.status === "success" ? "Editor Saved!" : "Operation Failed!"}
+          </div>
+          <div className="mt-1 text-slate-500">
+              {props.options?.text || "Notification Text Here"}
+          </div>
+      </div>
       {props.children}
     </div>
   );

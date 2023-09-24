@@ -19,5 +19,6 @@ class CustomUser(AbstractUser):
     is_verified = models.BooleanField(default=False)
     reset_password_token = models.UUIDField(default=uuid.uuid4,null=True, blank=True)
     reset_password_token_expiration = models.DateTimeField(default=timezone.now() + timedelta(hours=8),null=True, blank=True)
+    main_user = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
     def __str__(self):
         return self.username

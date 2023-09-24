@@ -6,12 +6,13 @@ from rest_framework.response import Response
 from datetime import timedelta
 from .serializers import UserSerializer, UserSignupSerializer,PasswordResetSerializer,SendNewVerificationEmailSerializer
 from django.core.mail import send_mail
-import uuid
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login
 from django.contrib.auth import logout
-from rest_framework.decorators import api_view
+from .models import CustomUser
+from django.core.mail import send_mail
+import uuid
 
 
 User = get_user_model()
@@ -70,6 +71,7 @@ class AdminLoginView(views.APIView):
             return Response({'message': 'Admin logged in successfully'}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'Invalid credentials or not an admin'}, status=status.HTTP_401_UNAUTHORIZED)
+
 class UserLoginView(views.APIView):
     def post(self, request):
         username = request.data.get('email')
@@ -182,9 +184,65 @@ class UserLogoutView(views.APIView):
         else:
             return Response({"message": "No user is logged in"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def check_auth_status(request):
-    if request.user.is_authenticated:
-        return Response({'status': 'authenticated'}, status=status.HTTP_200_OK)
-    else:
-        return Response({'status': 'unauthenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+class CheckAuthStatusView(views.APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            return Response({'status': 'authenticated'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': 'unauthenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class AddEditorView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        main_user = request.user
+        editor_data = request.data
+        editor_data['main_user'] = main_user.id
+        editor_data['role'] = 'editor'
+
+        serializer = UserSerializer(data=editor_data)
+        if serializer.is_valid():
+            serializer.save()
+            editor = CustomUser.objects.get(email=editor_data['email'])
+            reset_password_token = str(uuid.uuid4())
+            editor.reset_password_token = reset_password_token
+            editor.main_user = main_user
+            editor.save()
+            send_mail(
+                'Set Password to your account',
+                f'Click the link to set password your account: http://localhost:8000/password_reset_confirm/{reset_password_token}',
+                'admin@vulture.co.in',
+                [editor_data['email']],
+                fail_silently=False,
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RemoveEditorView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        main_user = request.user
+        editor_email = request.data.get("email", None)
+        
+        if not editor_email:
+            return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            editor = CustomUser.objects.get(email=editor_email, main_user=main_user)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'Editor not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        editor.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ListEditorsView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        main_user = request.user
+        editors = CustomUser.objects.filter(main_user=main_user, role='editor')
+        serializer = UserSerializer(editors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

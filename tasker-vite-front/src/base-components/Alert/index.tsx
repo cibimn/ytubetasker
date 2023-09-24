@@ -1,4 +1,4 @@
-import { forwardRef, useState, Fragment } from "react";
+import { forwardRef, useState, Fragment,JSXElementConstructor } from "react";
 import { twMerge } from "tailwind-merge";
 import { Transition } from "@headlessui/react";
 
@@ -30,6 +30,7 @@ type AlertProps<C extends React.ElementType> = PolymorphicComponentPropWithRef<
   {
     children:
       | React.ReactNode
+      | null
       | ((props: { dismiss: () => void }) => JSX.Element);
     dismissible?: boolean;
     variant?: Variant;
@@ -40,9 +41,14 @@ type AlertProps<C extends React.ElementType> = PolymorphicComponentPropWithRef<
   }
 >;
 
+// type AlertComponent = <C extends React.ElementType = "div">(
+//   props: AlertProps<C>
+// ) => React.ReactElement | null;
+
 type AlertComponent = <C extends React.ElementType = "div">(
   props: AlertProps<C>
-) => React.ReactElement | null;
+) => React.ReactElement<any, string | JSXElementConstructor<any>> | null;
+
 
 const Alert: AlertComponent = forwardRef(
   <C extends React.ElementType>(
@@ -184,13 +190,22 @@ const Alert: AlertComponent = forwardRef(
             props.className,
           ])}
         >
-          {typeof props.children === "function"
+          {props.children ? (
+            typeof props.children === "function"
+              ? props.children({
+                  dismiss: () => {
+                    setShow(false);
+                  },
+                })
+              : props.children
+          ) : null}
+          {/* {typeof props.children === "function"
             ? props.children({
                 dismiss: () => {
                   setShow(false);
                 },
               })
-            : props.children}
+            : props.children} */}
         </Component>
       </Transition>
     );

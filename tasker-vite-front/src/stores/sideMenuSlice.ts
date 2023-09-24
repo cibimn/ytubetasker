@@ -19,30 +19,29 @@ const initialState: SideMenuState = {
     {
       icon: "Home",
       title: "Dashboard",
+      pathname: "/dashboard",
+    },
+    {
+      icon: "Users",
+      title: "Editors",
+      pathname: "/editors",
+    },
+    {
+      icon: "Film",
+      title: "Tasks",
       subMenu: [
         {
           icon: "Activity",
-          pathname: "/",
-          title: "Overview 1",
+          pathname: "/tasks",
+          title: "Get Tasks",
         },
         {
           icon: "Activity",
-          pathname: "/dashboard-overview-2",
-          title: "Overview 2",
-        },
-        {
-          icon: "Activity",
-          pathname: "/dashboard-overview-3",
-          title: "Overview 3",
-        },
-        {
-          icon: "Activity",
-          pathname: "/dashboard-overview-4",
-          title: "Overview 4",
-        },
+          pathname: "/addtask",
+          title: "Create Task",
+        }
       ],
     },
-    
   ],
 };
 

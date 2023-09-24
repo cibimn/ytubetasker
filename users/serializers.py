@@ -9,17 +9,31 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'role')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'role', 'main_user', "is_active")
+        extra_kwargs = {'password': {'write_only': True,'required': False}}
+    
+    def validate_role(self, value):
+        return 'editor'  
+    
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            email=validated_data['email'],
+            is_active=False,
+            role='editor'
+        )
+        return user
 
 class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'role')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'role', 'main_user')
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_role(self, value):
-        return 'user'  # Force role to be 'user'
+        return 'user'  
     
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -45,6 +59,7 @@ class PasswordResetSerializer(serializers.Serializer):
         instance.set_password(validated_data['new_password'])
         instance.reset_password_token = None
         instance.reset_password_token_expiration = None
+        instance.is_active = True
         instance.save()
         return instance
 
