@@ -23,11 +23,7 @@ function Main() {
                 <h2 className="mr-auto text-lg font-medium">Add New Post</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Menu>
-                        <Menu.Button
-                            as={Button}
-                            variant="primary"
-                            className="flex items-center shadow-md"
-                        >
+                        <Menu.Button as={Button} variant="primary" className="flex items-center shadow-md" >
                             Save
                         </Menu.Button>
                         

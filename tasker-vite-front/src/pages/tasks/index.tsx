@@ -1,12 +1,18 @@
 import _ from "lodash";
 import { useState, useEffect, useRef } from "react";
-import fakerData from "../../utils/faker";
 import Button from "../../base-components/Button";
 import Pagination from "../../base-components/Pagination";
-import { FormInput, FormSelect } from "../../base-components/Form";
+import { FormInput, FormSelect, FormLabel, FormSwitch, FormTextarea, } from "../../base-components/Form";
 import Lucide from "../../base-components/Lucide";
-import { Dialog, Menu } from "../../base-components/Headless";
+import { Dialog, Menu, Slideover } from "../../base-components/Headless";
 import axios from 'axios';
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import Toastify from "toastify-js";
+import clsx from "clsx";
+import Notification from "../../base-components/Notification";
+import Dropzone, { DropzoneElement } from "../../base-components/Dropzone";
 
 
 function Main() {
@@ -89,13 +95,123 @@ function Main() {
                 });
         }
     };
+    const [superlargeSlideoverSizePreview, setSuperlargeSlideoverSizePreview] = useState(false);
+    const schema = yup
+        .object({
+            name: yup.string().required().min(2),
+            email: yup.string().required().email(),
+            password: yup.string().required().min(6),
+            age: yup
+                .number()
+                .required()
+                .test("len", "age must be less than or equal to 3", (val) =>
+                    val && val.toString().length <= 3 ? true : false
+                ),
+            url: yup.string().url(),
+            comment: yup.string().required().min(10),
+        })
+        .required();
+
+    const {
+        register,
+        trigger,
+        formState: { errors },
+    } = useForm({
+        mode: "onChange",
+        resolver: yupResolver(schema),
+    });
+    const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const result = await trigger();
+        if (!result) {
+            const failedEl = document
+                .querySelectorAll("#failed-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            failedEl.classList.remove("hidden");
+            Toastify({
+                node: failedEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+        } else {
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+        }
+    };
+    const dropzoneSingleRef = useRef<DropzoneElement>();
+    // useEffect(() => {
+    //     const elDropzoneSingleRef = dropzoneSingleRef.current;
+    //     if (elDropzoneSingleRef) {
+    //         elDropzoneSingleRef.dropzone.on("success", () => {
+    //             alert("Added file.");
+    //         });
+    //         elDropzoneSingleRef.dropzone.on("error", () => {
+    //             alert("No more files please!");
+    //         });
+    //     }
+    // }, []);
+    const [uploadUrl, setUploadUrl] = useState<string | null>(null);
+    const [authToken, setAuthToken] = useState<string | null>(null);
+    
+    useEffect(() => {
+        const elDropzoneSingleRef = dropzoneSingleRef.current;
+        if (elDropzoneSingleRef) {
+            elDropzoneSingleRef.dropzone.on("addedfile", async (file) => {
+                try {
+                    const config = {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        withCredentials: true,
+                    };
+                    const response = await axios.get(`http://localhost:8000/api/tasks/get_presigned_url/?filename=${file.name}`, config);
+                    const presignedUrl = response.data.presigned_url;
+                    console.log(presignedUrl);
+                    elDropzoneSingleRef.dropzone.options.url = presignedUrl;
+                    if (elDropzoneSingleRef.dropzone.options.headers) {
+                        delete elDropzoneSingleRef.dropzone.options.headers["My-Awesome-Header"];
+                    }
+                    elDropzoneSingleRef.dropzone.processFile(file);
+
+                } catch (error) {
+                    console.error("Error fetching pre-signed URL:", error);
+                }
+            });
+
+            elDropzoneSingleRef.dropzone.on("success", () => {
+                alert("Added file.");
+            });
+
+            elDropzoneSingleRef.dropzone.on("error", () => {
+                alert("No more files please!");
+            });
+        }
+    }, []);
     return (
         <>
             <h2 className="mt-10 text-lg font-medium intro-y">Product Grid</h2>
             <div className="grid grid-cols-12 gap-6 mt-5">
                 <div className="flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap">
-                    <Button variant="primary"  className="mr-2 shadow-md">
-                        <a href="/addtask" >Add New Product</a>
+                    <Button variant="primary" className="mr-2 shadow-md" onClick={(event: React.MouseEvent) => {
+                        event.preventDefault();
+                        setSuperlargeSlideoverSizePreview(true);
+                    }}>
+                        Add New Task
                     </Button>
 
                     <div className="hidden mx-auto md:block text-slate-500">
@@ -117,7 +233,7 @@ function Main() {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* BEGIN: Users Layout */}
                 {displayedTasks.map((task, index) => (
                     <div
@@ -155,7 +271,7 @@ function Main() {
                                 </div>
                             </div>
                             <div className="flex items-center justify-center p-5 border-t lg:justify-end border-slate-200/60">
-                            <a className="flex items-center mr-auto text-primary" href="#">
+                                <a className="flex items-center mr-auto text-primary" href="#">
                                     <Lucide icon="Eye" className="w-4 h-4 mr-1" /> Preview
                                 </a>
                                 <a className="flex items-center mr-3" href="#">
@@ -257,7 +373,168 @@ function Main() {
                     </div>
                 </Dialog.Panel>
             </Dialog>
+            <Slideover
+                size="xl"
+                open={superlargeSlideoverSizePreview}
+                onClose={() => {
+                    setSuperlargeSlideoverSizePreview(false);
+                }}
+            >
+                <Slideover.Panel>
+                    <Slideover.Title className="p-5">
+                        <h2 className="mr-auto text-base font-medium">
+                            Create A Task
+                        </h2>
+                    </Slideover.Title>
+                    <Slideover.Description>
+                        <div>
+                            <div className="input-form">
+                                <FormLabel
+                                    htmlFor="validation-form-1"
+                                    className="flex flex-col w-full sm:flex-row"
+                                >
+                                    Title
+                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                        Required, at least 2 characters
+                                    </span>
+                                </FormLabel>
+                                <FormInput
+                                    {...register("name")}
+                                    id="validation-form-1"
+                                    type="text"
+                                    name="name"
+                                    className={clsx({
+                                        "border-danger": errors.name,
+                                    })}
+                                    placeholder="Gonna be No. 1 in Youtube"
+                                />
+                                {errors.name && (
+                                    <div className="mt-2 text-danger">
+                                        {typeof errors.name.message === "string" &&
+                                            errors.name.message}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="mt-3 input-form">
+                            <FormLabel
+                                htmlFor="validation-form-6"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Description
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Required, at least 10 characters
+                                </span>
+                            </FormLabel>
+                            <FormTextarea
+                                {...register("comment")}
+                                id="validation-form-6"
+                                name="comment"
+                                className={clsx({
+                                    "border-danger": errors.comment,
+                                })}
+                                placeholder="Type your comments"
+                            ></FormTextarea>
+                            {errors.comment && (
+                                <div className="mt-2 text-danger">
+                                    {typeof errors.comment.message === "string" &&
+                                        errors.comment.message}
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-3">
+                            <FormLabel htmlFor="modal-form-4">
+                                Keywords
+                            </FormLabel>
+                            <FormInput
+                                id="modal-form-4"
+                                type="text"
+                                placeholder="Job, Work, Documentation"
+                            />
+                        </div>
+                        <div className="mt-3">
+                            <FormLabel htmlFor="modal-form-4">
+                                Thumbnail
+                            </FormLabel>
+                            <Dropzone
+                                getRef={(el) => {
+                                    dropzoneSingleRef.current = el;
+                                }}
+                                options={{
+                                    url: "https://httpbin.org/post",
+                                    thumbnailWidth: 150,
+                                    maxFilesize: 0.5,
+                                    maxFiles: 1,
+                                    headers: { "My-Awesome-Header": "header value" },
+                                }}
+                                className="dropzone"
+                            >
+                                <div className="text-lg font-medium">
+                                    Drop files here or click to upload.
+                                </div>
+                                <div className="text-gray-600">
+                                    This is just a demo dropzone. Selected files are
+                                    <span className="font-medium">not</span> actually
+                                    uploaded.
+                                </div>
+                            </Dropzone>
+                        </div>
+                        <div className="mt-3">
+                            <FormLabel htmlFor="modal-form-6">Size</FormLabel>
+                            <FormSelect id="modal-form-6">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>35</option>
+                                <option>50</option>
+                            </FormSelect>
+                        </div>
+                    </Slideover.Description>
+                    <Slideover.Footer>
+                        <Button
+                            variant="outline-secondary"
+                            type="button"
+                            onClick={() => {
+                                setSuperlargeSlideoverSizePreview(false);
+                            }}
+                            className="w-20 mr-1"
+                        >
+                            Cancel
+                        </Button>
+                        <Button variant="primary" type="submit" className="mt-5">
+                            Save
+                        </Button>
+                    </Slideover.Footer>
+                </Slideover.Panel>
+            </Slideover>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">Registration success!</div>
+                    <div className="mt-1 text-slate-500">
+                        Please check your e-mail for further info!
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
+            {/* BEGIN: Failed Notification Content */}
+            <Notification
+                id="failed-notification-content"
+                className="flex"
+            >
+                <Lucide icon="XCircle" className="text-danger" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">Registration failed!</div>
+                    <div className="mt-1 text-slate-500">
+                        Please check the fileld form.
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Failed Notification Content */}
         </>
     );
 }

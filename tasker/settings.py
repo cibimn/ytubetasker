@@ -13,6 +13,28 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import ssl
+from dotenv import load_dotenv
+import boto3
+from botocore.client import Config
+
+load_dotenv()
+
+ACCOUNT_ID = os.getenv("account_id")
+APPLICATION_KEY = os.getenv("application_key")
+BUCKET_ID = os.getenv("bucket_id")
+BUCKET_NAME = os.getenv("bucketName")
+
+B2_ACCESS_KEY_ID = 'your_s3_compatible_key_id'  # S3 Compatible Key ID
+B2_SECRET_ACCESS_KEY = 'your_s3_compatible_secret_key'  # S3 Compatible Application Key
+B2_BUCKET_NAME = BUCKET_NAME
+
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=ACCOUNT_ID,
+    aws_secret_access_key=APPLICATION_KEY,
+    endpoint_url='https://s3.us-east-005.backblazeb2.com',
+    config=Config(signature_version='s3v4'),
+)
 
 
 ssl._create_default_https_context = ssl._create_unverified_context
