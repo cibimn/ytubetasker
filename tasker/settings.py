@@ -100,12 +100,12 @@ TEMPLATES = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com",  "https://ytubetasker.co.in",    # Frontend domain in production
-    "http://ytubetasker.co.in","https://backend.ytubetaker.co.in",  # If you expect CSRF-protected POST requests from here
+    "http://ytubetasker.co.in","https://backend.ytubetasker.co.in",  # If you expect CSRF-protected POST requests from here
     "http://backend.ytubetaker.co.in",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com", "https://ytubetasker.co.in",
-    "http://ytubetasker.co.in","https://backend.ytubetaker.co.in",  # If you expect CSRF-protected POST requests from here
+    "http://ytubetasker.co.in","https://backend.ytubetasker.co.in",  # If you expect CSRF-protected POST requests from here
     "http://backend.ytubetaker.co.in",
 ]
 WSGI_APPLICATION = 'tasker.wsgi.application'
