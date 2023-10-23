@@ -99,10 +99,14 @@ TEMPLATES = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com",  # React app address
+    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com",  "https://ytubetasker.co.in",    # Frontend domain in production
+    "http://ytubetasker.co.in","https://backend.ytubetaker.co.in",  # If you expect CSRF-protected POST requests from here
+    "http://backend.ytubetaker.co.in",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com", # Also trust this origin for CSRF
+    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com", "https://ytubetasker.co.in",
+    "http://ytubetasker.co.in","https://backend.ytubetaker.co.in",  # If you expect CSRF-protected POST requests from here
+    "http://backend.ytubetaker.co.in",
 ]
 WSGI_APPLICATION = 'tasker.wsgi.application'
 
@@ -120,9 +124,17 @@ CORS_ALLOW_CREDENTIALS = True
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ytubetaker',  # Name of your PostgreSQL database
+        'USER': 'cb',  # PostgreSQL username you created
+        'PASSWORD': 'ABIcb#13',  # Password for the PostgreSQL user
+        'HOST': 'localhost',  # Set to the address of your PostgreSQL. Use 'localhost' if it's on the same server
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
 
@@ -178,3 +190,36 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Use HTTPS for the CSRF cookie
+CSRF_COOKIE_HTTPONLY = True
+
+# Enable HSTS (HTTP Strict Transport Security)
+HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_SECONDS = HSTS_SECONDS
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Prevent clickjacking attacks
+X_FRAME_OPTIONS = 'DENY'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/logfile.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
