@@ -13,9 +13,37 @@ import Toastify from "toastify-js";
 import clsx from "clsx";
 import Notification from "../../base-components/Notification";
 import Dropzone, { DropzoneElement } from "../../base-components/Dropzone";
-
+import { useNavigate } from 'react-router-dom';
 
 function Main() {
+    const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    useEffect(() => {
+        const checkLoggedInStatus = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/users/check_auth_status/', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    withCredentials: true,
+                });
+                if (response.status === 200) {
+                    console.log("User is authenticated");
+                    setIsLoggedIn(true);
+                } else {
+                    // Redirect to login page if the status is anything other than 200.
+                    navigate('/login');
+                }
+            } catch (error) {
+                setIsLoggedIn(false);
+                navigate('/login'); // Redirect to login page if there's an error.
+            }
+        };
+    
+        checkLoggedInStatus();
+    }, [navigate]); // Add navigate as a dependency to the useEffect hook.
+    
+    
     interface Task {
         title: string;
         created_at: string;
@@ -154,54 +182,92 @@ function Main() {
         }
     };
     const dropzoneSingleRef = useRef<DropzoneElement>();
-    // useEffect(() => {
-    //     const elDropzoneSingleRef = dropzoneSingleRef.current;
-    //     if (elDropzoneSingleRef) {
-    //         elDropzoneSingleRef.dropzone.on("success", () => {
-    //             alert("Added file.");
-    //         });
-    //         elDropzoneSingleRef.dropzone.on("error", () => {
-    //             alert("No more files please!");
-    //         });
-    //     }
-    // }, []);
-    const [uploadUrl, setUploadUrl] = useState<string | null>(null);
-    const [authToken, setAuthToken] = useState<string | null>(null);
-    
     useEffect(() => {
         const elDropzoneSingleRef = dropzoneSingleRef.current;
         if (elDropzoneSingleRef) {
-            elDropzoneSingleRef.dropzone.on("addedfile", async (file) => {
-                try {
-                    const config = {
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        withCredentials: true,
-                    };
-                    const response = await axios.get(`http://localhost:8000/api/tasks/get_presigned_url/?filename=${file.name}`, config);
-                    const presignedUrl = response.data.presigned_url;
-                    console.log(presignedUrl);
-                    elDropzoneSingleRef.dropzone.options.url = presignedUrl;
-                    if (elDropzoneSingleRef.dropzone.options.headers) {
-                        delete elDropzoneSingleRef.dropzone.options.headers["My-Awesome-Header"];
-                    }
-                    elDropzoneSingleRef.dropzone.processFile(file);
-
-                } catch (error) {
-                    console.error("Error fetching pre-signed URL:", error);
-                }
-            });
-
             elDropzoneSingleRef.dropzone.on("success", () => {
                 alert("Added file.");
             });
-
             elDropzoneSingleRef.dropzone.on("error", () => {
                 alert("No more files please!");
             });
         }
     }, []);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setSelectedFile(event.target.files[0]);
+        }
+    };
+
+    const onUploadClick = async () => {
+        if (!selectedFile) {
+            alert('Please select a file first');
+            return;
+        }
+
+        // Get the presigned URL from the backend
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
+            };
+            const response = await axios.get('http://localhost:8000/api/tasks/get_presigned_url/?filename=$' + selectedFile.name, config);
+            const presignedUrl = response.data.presigned_url;
+            console.log(selectedFile.type);
+            // Upload the file to the presigned URL
+            await axios.put(presignedUrl, selectedFile, {
+                headers: {
+                    'Content-Type': selectedFile.type
+                }
+            });
+            alert('File uploaded successfully');
+        } catch (error) {
+            console.error('Error uploading the file:', error);
+            alert('Error uploading the file');
+        }
+    };
+    // useEffect(() => {
+    //     const elDropzoneSingleRef = dropzoneSingleRef.current;
+    //     if (elDropzoneSingleRef) {
+    //         console.log("Dropzone ref exists.");
+    //         elDropzoneSingleRef.dropzone.on("addedfile", async (file:any) => {
+    //             try {
+    //                 const config = {
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                     },
+    //                     withCredentials: true,
+    //                 };
+    //                 // Fetch pre-signed URL from Django backend
+    //                 const response = await axios.get(`http://localhost:8000/api/tasks/get_presigned_url/?filename=${file.name}`, config);
+                    
+    //                 // Check if the response contains the expected data
+    //                 if (response.data && response.data.presigned_url) {
+    //                     const presignedUrl = response.data.presigned_url;
+    //                     elDropzoneSingleRef.dropzone.options.url = presignedUrl;
+    //                     elDropzoneSingleRef.dropzone.processFile(file);
+    //                 } else {
+    //                     console.error("Invalid response from the server");
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error fetching pre-signed URL:", error);
+    //             }
+    //         });
+    
+    //         elDropzoneSingleRef.dropzone.on("success", (file, response) => {
+    //             console.log("File uploaded successfully:", file, response);
+    //         });
+    
+    //         elDropzoneSingleRef.dropzone.on("error", (file, error, xhr) => {
+    //             console.error("File upload failed:", file, error, xhr);
+    //         });
+    //     }
+    // }, []);
+    
     return (
         <>
             <h2 className="mt-10 text-lg font-medium intro-y">Product Grid</h2>
@@ -478,6 +544,12 @@ function Main() {
                                     uploaded.
                                 </div>
                             </Dropzone>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <input type="file" onChange={onFileChange} />
+                            <button onClick={onUploadClick} style={{ margin: '10px' }}>
+                                Upload
+                            </button>
                         </div>
                         <div className="mt-3">
                             <FormLabel htmlFor="modal-form-6">Size</FormLabel>

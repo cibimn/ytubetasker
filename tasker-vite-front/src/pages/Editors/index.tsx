@@ -258,6 +258,7 @@ function Main() {
                                                         alt={editor.first_name}
                                                         className="border-white rounded-lg shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
                                                         src={editor.image}
+                                                        content={`Uploaded by ${editor.first_name}`}
                                                     />
                                                 ) : (
                                                     <Tippy
@@ -265,7 +266,9 @@ function Main() {
                                                         alt={editor.first_name}
                                                         className="border-white rounded-lg shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
                                                         src={defaultprofile}
+                                                        content={`Uploaded by ${editor.first_name}`}
                                                     />
+                                                    
                                                 )}
 
                                             </div>

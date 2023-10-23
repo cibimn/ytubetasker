@@ -8,6 +8,7 @@ from django.http import JsonResponse
 import requests
 import json
 from django.conf import settings
+from .s3_utils import s3_client
 
 class TaskListView(views.APIView):
     def get(self, request):
@@ -106,7 +107,7 @@ def get_presigned_url(request):
     if filename is None:
         return JsonResponse({'error': 'Filename is required'}, status=400)
 
-    presigned_url = settings.s3_client.generate_presigned_url(
+    presigned_url = s3_client.generate_presigned_url(
         'put_object',
         Params={
             'Bucket': settings.B2_BUCKET_NAME,

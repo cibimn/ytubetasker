@@ -99,10 +99,10 @@ TEMPLATES = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000","http://localhost:5173",  # React app address
+    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com",  # React app address
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000","http://localhost:5173", # Also trust this origin for CSRF
+    "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com", # Also trust this origin for CSRF
 ]
 WSGI_APPLICATION = 'tasker.wsgi.application'
 
