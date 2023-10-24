@@ -1,0 +1,28 @@
+[2023-10-24 00:21:22 -0400] [24989] [INFO] Starting gunicorn 21.2.0
+[2023-10-24 00:21:22 -0400] [24989] [INFO] Listening at: http://127.0.0.1:8001 (24989)
+[2023-10-24 00:21:22 -0400] [24989] [INFO] Using worker: sync
+[2023-10-24 00:21:22 -0400] [24990] [INFO] Booting worker with pid: 24990
+[2023-10-24 00:35:32 -0400] [24989] [INFO] Handling signal: term
+[2023-10-24 04:35:32 +0000] [24990] [INFO] Worker exiting (pid: 24990)
+[2023-10-24 00:35:32 -0400] [24989] [INFO] Shutting down: Master
+[2023-10-24 00:36:45 -0400] [25102] [INFO] Starting gunicorn 21.2.0
+[2023-10-24 00:36:45 -0400] [25102] [INFO] Listening at: http://127.0.0.1:8001 (25102)
+[2023-10-24 00:36:45 -0400] [25102] [INFO] Using worker: sync
+[2023-10-24 00:36:45 -0400] [25103] [INFO] Booting worker with pid: 25103
+[2023-10-24 02:59:45 -0400] [25102] [INFO] Handling signal: term
+[2023-10-24 06:59:45 +0000] [25103] [INFO] Worker exiting (pid: 25103)
+[2023-10-24 02:59:45 -0400] [25102] [INFO] Shutting down: Master
+[2023-10-24 03:00:03 -0400] [26256] [INFO] Starting gunicorn 21.2.0
+[2023-10-24 03:00:03 -0400] [26256] [INFO] Listening at: http://127.0.0.1:8001 (26256)
+[2023-10-24 03:00:03 -0400] [26256] [INFO] Using worker: sync
+[2023-10-24 03:00:03 -0400] [26257] [INFO] Booting worker with pid: 26257
+[2023-10-24 03:17:11 -0400] [26256] [INFO] Handling signal: term
+[2023-10-24 07:17:11 +0000] [26257] [INFO] Worker exiting (pid: 26257)
+[2023-10-24 03:17:11 -0400] [26256] [INFO] Shutting down: Master
+[2023-10-24 03:25:28 -0400] [26713] [INFO] Starting gunicorn 21.2.0
+[2023-10-24 03:25:28 -0400] [26713] [INFO] Listening at: http://127.0.0.1:8001 (26713)
+[2023-10-24 03:25:28 -0400] [26713] [INFO] Using worker: sync
+[2023-10-24 03:25:28 -0400] [26714] [INFO] Booting worker with pid: 26714
+[2023-10-24 03:26:44 -0400] [26713] [INFO] Handling signal: term
+[2023-10-24 07:26:44 +0000] [26714] [INFO] Worker exiting (pid: 26714)
+[2023-10-24 03:26:44 -0400] [26713] [INFO] Shutting down: Master

@@ -49,10 +49,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-4b5&7r(u2*g#^cx+uo9-emuh+ulplp)zbv(&ju6udkn=yf=8xu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True 
 
-ALLOWED_HOSTS = ['backend.ytubetasker.co.in']
-
+ALLOWED_HOSTS = ['backend.ytubetasker.co.in','207.2.123.7']
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Application definition
 
@@ -101,12 +104,12 @@ TEMPLATES = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com",  "https://ytubetasker.co.in",    # Frontend domain in production
     "http://ytubetasker.co.in","https://backend.ytubetasker.co.in",  # If you expect CSRF-protected POST requests from here
-    "http://backend.ytubetasker.co.in",
+    "http://backend.ytubetasker.co.in","http://207.2.123.7","https://207.2.123.7",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000","http://localhost:5173","https://s3.us-east-005.backblazeb2.com", "https://ytubetasker.co.in",
     "http://ytubetasker.co.in","https://backend.ytubetasker.co.in",  # If you expect CSRF-protected POST requests from here
-    "http://backend.ytubetasker.co.in",
+    "http://backend.ytubetasker.co.in","http://207.2.123.7","https://207.2.123.7",
 ]
 WSGI_APPLICATION = 'tasker.wsgi.application'
 
