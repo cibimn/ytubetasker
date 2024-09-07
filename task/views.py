@@ -6,7 +6,6 @@ import uuid
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 import requests
-import json
 from django.conf import settings
 from .s3_utils import s3_client
 
